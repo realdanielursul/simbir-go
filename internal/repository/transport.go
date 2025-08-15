@@ -21,9 +21,6 @@ func (r *TransportRepository) Create(ctx context.Context, transport *entity.Tran
 	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
 
-	// question: pass time values from service layer
-	// or delegate it to database default values
-
 	var id int64
 	query := `INSERT INTO transports (owner_id, can_be_rented, transport_type, model, color, identifier, description, latitude, longitude, minute_price, day_price)`
 	if err := r.QueryRowContext(ctx, query, transport.OwnerID, transport.CanBeRented, transport.TransportType, transport.Model, transport.Color, transport.Identifier, transport.Description, transport.Latitude, transport.Longitude, transport.MinutePrice, transport.DayPrice).Scan(&id); err != nil {
