@@ -1,0 +1,21 @@
+app:
+  name: order-service
+  version: 1.0.0
+
+http:
+  port: 8080
+
+postgres:
+  host: localhost
+  port: 5432
+  username: postgres
+  password: postgres
+  database: simbirgo
+  ssl_mode: disable
+
+jwt:
+  sign_key: GBANDS812
+  token_ttl: 120m
+
+hasher:
+  salt: da9d3x.3/23Z@@23041_@#@3
