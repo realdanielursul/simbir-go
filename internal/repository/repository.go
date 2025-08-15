@@ -10,7 +10,6 @@ import (
 
 const operationTimeout = 3 * time.Second
 
-// AccountRepository отвечает за CRUD аккаунтов и аутентификацию
 type Account interface {
 	Create(ctx context.Context, account *entity.Account) (int64, error)
 	GetByID(ctx context.Context, id int64) (*entity.Account, error)
@@ -19,7 +18,6 @@ type Account interface {
 	List(ctx context.Context, count, start int) ([]entity.Account, error)
 	Update(ctx context.Context, account *entity.Account) error
 	Delete(ctx context.Context, id int64) error
-	// UpdateBalance(ctx context.Context, id int64, amount float64) error
 }
 
 type Token interface {
@@ -40,19 +38,18 @@ type Transport interface {
 }
 
 type Rent interface {
+	StartRent(ctx context.Context, rent *entity.Rent) (int64, error)
+	EndRent(ctx context.Context, rentID int64, lat, long float64) error
 	GetByID(ctx context.Context, id int64) (*entity.Rent, error)
-	Create(ctx context.Context, rent *entity.Rent) (int64, error)
-	Update(ctx context.Context, rent *entity.Rent) error
-	Delete(ctx context.Context, id int64) error
-
 	GetHistoryByUser(ctx context.Context, userID int64) ([]entity.Rent, error)
 	GetHistoryByTransport(ctx context.Context, transportID int64) ([]entity.Rent, error)
 	GetActiveByUser(ctx context.Context, userID int64) ([]entity.Rent, error)
-	EndRent(ctx context.Context, rentID int64, lat, long float64) error
+	Update(ctx context.Context, rent *entity.Rent) error
+	Delete(ctx context.Context, id int64) error
 }
 
 type Payment interface {
-	AddBalance(ctx context.Context, accountID int64, amount float64) error
+	UpdateBalance(ctx context.Context, accountID int64, amount float64) error
 }
 
 type Repositories struct {
@@ -65,6 +62,10 @@ type Repositories struct {
 
 func NewRepositories(db *sqlx.DB) *Repositories {
 	return &Repositories{
-		// initialize repos
+		Account:   NewAccountRepository(db),
+		Token:     NewTokenRepository(db),
+		Transport: NewTransportRepository(db),
+		Rent:      NewRentRepository(db),
+		Payment:   NewPaymentRepository(db),
 	}
 }
