@@ -20,9 +20,6 @@ func (r *AccountRepository) Create(ctx context.Context, account *entity.Account)
 	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
 
-	// question: pass time values from service layer
-	// or delegate it to database default values
-
 	var id int64
 	query := `INSERT INTO accounts (username, password_hash, is_admin, balance) VALUES ($1, $2, $3, $4) RETURNING id`
 	if err := r.QueryRowContext(ctx, query, account.Username, account.PasswordHash, account.IsAdmin, account.Balance).Scan(&id); err != nil {
@@ -38,7 +35,7 @@ func (r *AccountRepository) GetByID(ctx context.Context, id int64) (*entity.Acco
 
 	var account entity.Account
 	query := `SELECT * FROM accounts WHERE id = $1`
-	if err := r.QueryRowxContext(ctx, query, id).StructScan(account); err != nil {
+	if err := r.QueryRowxContext(ctx, query, id).StructScan(&account); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
@@ -55,7 +52,7 @@ func (r *AccountRepository) GetByUsername(ctx context.Context, username string) 
 
 	var account entity.Account
 	query := `SELECT * FROM accounts WHERE username = $1`
-	if err := r.QueryRowxContext(ctx, query, username).StructScan(account); err != nil {
+	if err := r.QueryRowxContext(ctx, query, username).StructScan(&account); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
@@ -72,7 +69,7 @@ func (r *AccountRepository) GetByUsernameAndPassword(ctx context.Context, userna
 
 	var account entity.Account
 	query := `SELECT * FROM accounts WHERE username = $1 AND password_hash = $2`
-	if err := r.QueryRowxContext(ctx, query, username, passwordHash).StructScan(account); err != nil {
+	if err := r.QueryRowxContext(ctx, query, username, passwordHash).StructScan(&account); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
