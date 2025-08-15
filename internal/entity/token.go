@@ -1,7 +1,7 @@
 package entity
 
 type Token struct {
-	ID          int64  `db:"id"`
+	UserID      int64  `db:"user_id"`
 	TokenString string `db:"token_string"`
 	IsValid     bool   `db:"is_valid"`
 }
