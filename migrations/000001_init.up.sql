@@ -8,6 +8,12 @@ CREATE TABLE accounts (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS tokens (
+  user_id BIGINT NOT NULL,
+  token_string TEXT NOT NULL,
+  is_valid BOOLEAN NOT NULL
+);
+
 CREATE TABLE transports (
     id BIGSERIAL PRIMARY KEY,
     owner_id BIGINT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
