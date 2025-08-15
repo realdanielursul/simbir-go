@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/realdanielursul/simbir-go/internal/entity"
@@ -106,7 +105,7 @@ func (r *AccountRepository) List(ctx context.Context, count, start int) ([]entit
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows error: %w", err)
+		return nil, err
 	}
 
 	return accounts, nil
