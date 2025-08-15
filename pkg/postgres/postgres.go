@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/realdanielursul/pulse-api/config"
+	"github.com/realdanielursul/simbir-go/config"
 )
 
 func New(cfg config.Postgres) (*sqlx.DB, error) {
