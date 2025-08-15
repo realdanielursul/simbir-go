@@ -33,5 +33,5 @@ CREATE TABLE rents (
     time_end TIMESTAMPTZ,
     price_of_unit BIGINT NOT NULL,
     price_type TEXT NOT NULL CHECK (price_type IN ('Minutes', 'Days')),
-    final_price BIGINT,
+    final_price BIGINT
 );
