@@ -43,7 +43,7 @@ type Rent interface {
 	GetByID(ctx context.Context, id int64) (*entity.Rent, error)
 	GetHistoryByUser(ctx context.Context, userID int64) ([]entity.Rent, error)
 	GetHistoryByTransport(ctx context.Context, transportID int64) ([]entity.Rent, error)
-	GetActiveByUser(ctx context.Context, userID int64) ([]entity.Rent, error)
+	// GetActiveByUser(ctx context.Context, userID int64) ([]entity.Rent, error)
 	Update(ctx context.Context, rent *entity.Rent) error
 	Delete(ctx context.Context, id int64) error
 }
