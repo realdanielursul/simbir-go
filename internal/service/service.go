@@ -23,11 +23,11 @@ type AccountOutput struct {
 
 type Account interface {
 	SignUp(ctx context.Context, input *AccountInput) (int64, error)
-	SignIn(ctx context.Context, id int64) (string, error)
+	SignIn(ctx context.Context, input *AccountInput) (string, error)
 	SignOut(ctx context.Context, id int64) error
 	GetAccount(ctx context.Context, id int64) (*AccountOutput, error)
 	UpdateAccount(ctx context.Context, id int64, input *AccountInput) error
-	ValidateToken(ctx context.Context, tokenString string) (int, bool, error)
+	ValidateToken(ctx context.Context, tokenString string) (int64, bool, error)
 }
 
 type AdminAccountInput struct {
