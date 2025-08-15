@@ -25,7 +25,7 @@ services:
       - ./migrations:/migrations
     depends_on:
       postgres:
-        condition: service_health
+        condition: service_healthy
 
 volumes:
   pg_data:
