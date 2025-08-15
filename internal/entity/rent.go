@@ -8,7 +8,7 @@ type Rent struct {
 	UserID      int64     `db:"user_id"`
 	TimeStart   time.Time `db:"time_start"`
 	TimeEnd     time.Time `db:"time_end"`
-	PriceOfUnit float64   `db:"price_of_unit"`
+	PriceOfUnit int64     `db:"price_of_unit"`
 	PriceType   string    `db:"price_type"`
-	FinalPrice  float64   `db:"final_price"`
+	FinalPrice  int64     `db:"final_price"`
 }
