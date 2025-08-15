@@ -103,7 +103,11 @@ func (s *AccountService) SignIn(ctx context.Context, input *AccountInput) (strin
 }
 
 func (s *AccountService) SignOut(ctx context.Context, id int64) error {
-	return s.tokenRepo.InvalidateUserTokens(ctx, id)
+	if err := s.tokenRepo.InvalidateUserTokens(ctx, id); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *AccountService) GetAccount(ctx context.Context, id int64) (*AccountOutput, error) {
