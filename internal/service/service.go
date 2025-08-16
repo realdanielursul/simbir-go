@@ -54,6 +54,66 @@ type AdminAccount interface {
 	DeleteAccount(ctx context.Context, id int64) error
 }
 
+type TransportInput struct {
+	CanBeRented   string  `json:"canBeRented"`
+	TransportType string  `json:"transportType"`
+	Model         string  `json:"model"`
+	Color         string  `json:"color"`
+	Identifier    string  `json:"identifier"`
+	Description   string  `json:"description"`
+	Latitude      float64 `json:"latitude"`
+	Longitude     float64 `json:"longitude"`
+	MinutePrice   int64   `json:"minutePrice"`
+	DayPrice      int64   `json:"dayPrice"`
+}
+
+type TransportOutput struct {
+	ID            int64     `json:"id"`
+	OwnerID       int64     `json:"ownerId"`
+	CanBeRented   bool      `json:"canBeRented"`
+	TransportType string    `json:"transportType"`
+	Model         string    `json:"model"`
+	Color         string    `json:"color"`
+	Identifier    string    `json:"identifier"`
+	Description   string    `json:"description"`
+	Latitude      float64   `json:"latitude"`
+	Longitude     float64   `json:"longitude"`
+	MinutePrice   int64     `json:"minutePrice"`
+	DayPrice      int64     `json:"dayPrice"`
+	CreatedAt     time.Time `json:"createdAt"`
+	UpdatedAt     time.Time `json:"updatedAt"`
+}
+
+type Transport interface {
+	CreateTransport(ctx context.Context, input *TransportInput) (int64, error)
+	GetTransport(ctx context.Context, id int64) (*TransportOutput, error)
+	ListTransport(ctx context.Context, transportType string, count, start int) ([]TransportOutput, error)
+	ListTransportByOwner(ctx context.Context, ownerID int64) ([]TransportOutput, error)
+	ListTransportAvailable(ctx context.Context, lat, long, radius float64, transportType string) ([]TransportOutput, error)
+	UpdateTransport(ctx context.Context, id int64, input *TransportInput) error
+	DeleteTransport(ctx context.Context, id int64) error
+}
+
+type AdminTransportInput struct {
+	OwnerID       int64   `json:"ownerId"`
+	CanBeRented   string  `json:"canBeRented"`
+	TransportType string  `json:"transportType"`
+	Model         string  `json:"model"`
+	Color         string  `json:"color"`
+	Identifier    string  `json:"identifier"`
+	Description   string  `json:"description"`
+	Latitude      float64 `json:"latitude"`
+	Longitude     float64 `json:"longitude"`
+	MinutePrice   int64   `json:"minutePrice"`
+	DayPrice      int64   `json:"dayPrice"`
+}
+
+type AdminTransport interface {
+	CreateTransport(ctx context.Context, input *AdminTransportInput) (int64, error)
+	UpdateTransport(ctx context.Context, id int64, input *AdminTransportInput) error
+	DeleteTransport(ctx context.Context, id int64) error
+}
+
 type ServicesDependencies struct {
 	Repos    *repository.Repositories
 	Hasher   hasher.PasswordHasher
