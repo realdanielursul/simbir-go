@@ -29,6 +29,7 @@ type Token interface {
 type Transport interface {
 	Create(ctx context.Context, transport *entity.Transport) (int64, error)
 	GetByID(ctx context.Context, id int64) (*entity.Transport, error)
+	GetByIdentifier(ctx context.Context, identifier string) (*entity.Transport, error)
 	ListAll(ctx context.Context, count, start int) ([]entity.Transport, error)
 	ListByType(ctx context.Context, transportType string, count, start int) ([]entity.Transport, error)
 	ListByOwner(ctx context.Context, ownerID int64, count, start int) ([]entity.Transport, error)

@@ -47,6 +47,23 @@ func (r *TransportRepository) GetByID(ctx context.Context, id int64) (*entity.Tr
 	return &transport, nil
 }
 
+func (r *TransportRepository) GetByIdentifier(ctx context.Context, identifier string) (*entity.Transport, error) {
+	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
+	defer cancel()
+
+	var transport entity.Transport
+	query := `SELECT * FROM transport WHERE identifier = $1`
+	if err := r.QueryRowxContext(ctx, query, identifier).StructScan(&transport); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	return &transport, nil
+}
+
 func (r *TransportRepository) ListAll(ctx context.Context, count, start int) ([]entity.Transport, error) {
 	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
