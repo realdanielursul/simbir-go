@@ -88,7 +88,7 @@ type Transport interface {
 	CreateTransport(ctx context.Context, userID int64, input *TransportInput) (int64, error)
 	GetTransport(ctx context.Context, id int64) (*TransportOutput, error)
 	ListTransport(ctx context.Context, transportType string, count, start int) ([]TransportOutput, error)
-	ListTransportByOwner(ctx context.Context, ownerID int64) ([]TransportOutput, error)
+	ListTransportByOwner(ctx context.Context, ownerID int64, count, start int) ([]TransportOutput, error)
 	ListTransportAvailable(ctx context.Context, lat, long, radius float64, transportType string) ([]TransportOutput, error)
 	UpdateTransport(ctx context.Context, userID, id int64, input *TransportInput) error
 	DeleteTransport(ctx context.Context, userID, id int64) error
@@ -122,13 +122,17 @@ type ServicesDependencies struct {
 }
 
 type Services struct {
-	Account      Account
-	AdminAccount AdminAccount
+	Account        Account
+	AdminAccount   AdminAccount
+	Transport      Transport
+	AdminTransport AdminTransport
 }
 
 func NewServices(deps ServicesDependencies) *Services {
 	return &Services{
-		Account:      NewAccountService(deps.Repos.Account, deps.Repos.Token, deps.Hasher, deps.SignKey, deps.TokenTTL),
-		AdminAccount: NewAdminAccountService(deps.Repos.Account, deps.Repos.Token, deps.Hasher),
+		Account:        NewAccountService(deps.Repos.Account, deps.Repos.Token, deps.Hasher, deps.SignKey, deps.TokenTTL),
+		AdminAccount:   NewAdminAccountService(deps.Repos.Account, deps.Repos.Token, deps.Hasher),
+		Transport:      NewTransportService(deps.Repos.Transport),
+		AdminTransport: NewAdminTransportService(deps.Repos.Transport),
 	}
 }
