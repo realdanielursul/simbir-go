@@ -96,7 +96,7 @@ type Transport interface {
 
 type AdminTransportInput struct {
 	OwnerID       int64   `json:"ownerId"`
-	CanBeRented   string  `json:"canBeRented"`
+	CanBeRented   bool    `json:"canBeRented"`
 	TransportType string  `json:"transportType"`
 	Model         string  `json:"model"`
 	Color         string  `json:"color"`
@@ -110,7 +110,7 @@ type AdminTransportInput struct {
 
 type AdminTransport interface {
 	CreateTransport(ctx context.Context, input *AdminTransportInput) (int64, error)
-	UpdateTransport(ctx context.Context, input *AdminTransportInput) error
+	UpdateTransport(ctx context.Context, id int64, input *AdminTransportInput) error
 	DeleteTransport(ctx context.Context, id int64) error
 }
 
