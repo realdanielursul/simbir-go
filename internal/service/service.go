@@ -55,7 +55,7 @@ type AdminAccount interface {
 }
 
 type TransportInput struct {
-	CanBeRented   string  `json:"canBeRented"`
+	CanBeRented   bool    `json:"canBeRented"`
 	TransportType string  `json:"transportType"`
 	Model         string  `json:"model"`
 	Color         string  `json:"color"`
@@ -63,8 +63,8 @@ type TransportInput struct {
 	Description   string  `json:"description"`
 	Latitude      float64 `json:"latitude"`
 	Longitude     float64 `json:"longitude"`
-	MinutePrice   int64   `json:"minutePrice"`
-	DayPrice      int64   `json:"dayPrice"`
+	MinutePrice   float64 `json:"minutePrice"`
+	DayPrice      float64 `json:"dayPrice"`
 }
 
 type TransportOutput struct {
@@ -78,20 +78,20 @@ type TransportOutput struct {
 	Description   string    `json:"description"`
 	Latitude      float64   `json:"latitude"`
 	Longitude     float64   `json:"longitude"`
-	MinutePrice   int64     `json:"minutePrice"`
-	DayPrice      int64     `json:"dayPrice"`
+	MinutePrice   float64   `json:"minutePrice"`
+	DayPrice      float64   `json:"dayPrice"`
 	CreatedAt     time.Time `json:"createdAt"`
 	UpdatedAt     time.Time `json:"updatedAt"`
 }
 
 type Transport interface {
-	CreateTransport(ctx context.Context, input *TransportInput) (int64, error)
+	CreateTransport(ctx context.Context, userID int64, input *TransportInput) (int64, error)
 	GetTransport(ctx context.Context, id int64) (*TransportOutput, error)
 	ListTransport(ctx context.Context, transportType string, count, start int) ([]TransportOutput, error)
 	ListTransportByOwner(ctx context.Context, ownerID int64) ([]TransportOutput, error)
 	ListTransportAvailable(ctx context.Context, lat, long, radius float64, transportType string) ([]TransportOutput, error)
-	UpdateTransport(ctx context.Context, id int64, input *TransportInput) error
-	DeleteTransport(ctx context.Context, id int64) error
+	UpdateTransport(ctx context.Context, userID, id int64, input *TransportInput) error
+	DeleteTransport(ctx context.Context, userID, id int64) error
 }
 
 type AdminTransportInput struct {
@@ -104,13 +104,13 @@ type AdminTransportInput struct {
 	Description   string  `json:"description"`
 	Latitude      float64 `json:"latitude"`
 	Longitude     float64 `json:"longitude"`
-	MinutePrice   int64   `json:"minutePrice"`
-	DayPrice      int64   `json:"dayPrice"`
+	MinutePrice   float64 `json:"minutePrice"`
+	DayPrice      float64 `json:"dayPrice"`
 }
 
 type AdminTransport interface {
 	CreateTransport(ctx context.Context, input *AdminTransportInput) (int64, error)
-	UpdateTransport(ctx context.Context, id int64, input *AdminTransportInput) error
+	UpdateTransport(ctx context.Context, input *AdminTransportInput) error
 	DeleteTransport(ctx context.Context, id int64) error
 }
 
