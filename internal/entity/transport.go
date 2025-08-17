@@ -10,7 +10,7 @@ type Transport struct {
 	Model         string    `db:"model"`
 	Color         string    `db:"color"`
 	Identifier    string    `db:"identifier"`
-	Description   string    `db:"description"`
+	Description   *string   `db:"description"`
 	Latitude      float64   `db:"latitude"`
 	Longitude     float64   `db:"longitude"`
 	MinutePrice   int64     `db:"minute_price"`

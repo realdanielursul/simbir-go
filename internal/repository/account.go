@@ -84,7 +84,7 @@ func (r *AccountRepository) List(ctx context.Context, count, start int) ([]entit
 	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
 
-	accounts := make([]entity.Account, 0, 100)
+	accounts := make([]entity.Account, 0, count)
 	query := `SELECT * FROM accounts LIMIT $1 OFFSET $2`
 	rows, err := r.QueryxContext(ctx, query, count, start)
 	if err != nil {

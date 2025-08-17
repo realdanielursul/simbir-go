@@ -21,16 +21,16 @@ type Account interface {
 }
 
 type Token interface {
-	CreateToken(ctx context.Context, token *entity.Token) error
-	GetToken(ctx context.Context, tokenString string) (*entity.Token, error)
-	InvalidateUserTokens(ctx context.Context, id int64) error
+	Create(ctx context.Context, token *entity.Token) error
+	Invalidate(ctx context.Context, tokenString string) error
+	InvalidateAll(ctx context.Context, id int64) error
+	Get(ctx context.Context, tokenString string) (*entity.Token, error)
 }
 
 type Transport interface {
 	Create(ctx context.Context, transport *entity.Transport) (int64, error)
 	GetByID(ctx context.Context, id int64) (*entity.Transport, error)
 	GetByIdentifier(ctx context.Context, identifier string) (*entity.Transport, error)
-	ListAll(ctx context.Context, count, start int) ([]entity.Transport, error)
 	ListByType(ctx context.Context, transportType string, count, start int) ([]entity.Transport, error)
 	ListByOwner(ctx context.Context, ownerID int64, count, start int) ([]entity.Transport, error)
 	ListAvailable(ctx context.Context, lat, long, radius float64, transportType string) ([]entity.Transport, error)
@@ -40,11 +40,11 @@ type Transport interface {
 
 type Rent interface {
 	StartRent(ctx context.Context, rent *entity.Rent) (int64, error)
-	EndRent(ctx context.Context, rentID int64, lat, long float64) error
+	EndRent(ctx context.Context, id int64, lat, long float64) error
 	GetByID(ctx context.Context, id int64) (*entity.Rent, error)
 	GetHistoryByUser(ctx context.Context, userID int64) ([]entity.Rent, error)
 	GetHistoryByTransport(ctx context.Context, transportID int64) ([]entity.Rent, error)
-	// GetActiveByUser(ctx context.Context, userID int64) ([]entity.Rent, error)
+	ListActive(ctx context.Context) ([]entity.Rent, error)
 	Update(ctx context.Context, rent *entity.Rent) error
 	Delete(ctx context.Context, id int64) error
 }

@@ -8,8 +8,6 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/realdanielursul/simbir-go/config"
 	"github.com/realdanielursul/simbir-go/internal/repository"
-	"github.com/realdanielursul/simbir-go/internal/service"
-	"github.com/realdanielursul/simbir-go/pkg/hasher"
 	"github.com/realdanielursul/simbir-go/pkg/postgres"
 )
 
@@ -26,6 +24,8 @@ import (
 
 // philosophy: admin methods do not require validation
 
+// add set availability method to transport
+
 func main() {
 	cfg, err := config.NewConfig("./config/local.yaml")
 	if err != nil {
@@ -38,16 +38,17 @@ func main() {
 	}
 
 	repositories := repository.NewRepositories(db)
-
-	deps := service.ServicesDependencies{
-		Repos:    repositories,
-		Hasher:   hasher.NewSHA1Hasher(cfg.Hasher.Salt),
-		SignKey:  cfg.JWT.SignKey,
-		TokenTTL: cfg.JWT.TokenTTL,
-	}
-
-	services := service.NewServices(deps)
 	ctx := context.Background()
 
-	fmt.Println(services.AdminAccount.GetAccount(ctx, 1))
+	fmt.Println(repositories.Account.List(ctx, 100, 0))
+	// fmt.Println(repositories.Payment.UpdateBalance(ctx, 1, -50000))
+
+	// deps := service.ServicesDependencies{
+	// 	Repos:    repositories,
+	// 	Hasher:   hasher.NewSHA1Hasher(cfg.Hasher.Salt),
+	// 	SignKey:  cfg.JWT.SignKey,
+	// 	TokenTTL: cfg.JWT.TokenTTL,
+	// }
+
+	// services := service.NewServices(deps)
 }

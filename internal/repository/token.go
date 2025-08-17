@@ -15,12 +15,9 @@ func NewTokenRepository(db *sqlx.DB) *TokenRepository {
 	return &TokenRepository{db}
 }
 
-func (r *TokenRepository) CreateToken(ctx context.Context, token *entity.Token) error {
+func (r *TokenRepository) Create(ctx context.Context, token *entity.Token) error {
 	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
-
-	// question: pass values from service layer
-	// or delegate it to database default values
 
 	query := `INSERT INTO tokens (id, token_string) VALUES ($1, $2)`
 	if _, err := r.ExecContext(ctx, query, token.UserID, token.TokenString); err != nil {
@@ -30,7 +27,31 @@ func (r *TokenRepository) CreateToken(ctx context.Context, token *entity.Token) 
 	return nil
 }
 
-func (r *TokenRepository) GetToken(ctx context.Context, tokenString string) (*entity.Token, error) {
+func (r *TokenRepository) Invalidate(ctx context.Context, tokenString string) error {
+	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
+	defer cancel()
+
+	query := `UPDATE tokens SET is_valid = FALSE WHERE token_string = $1`
+	if _, err := r.ExecContext(ctx, query, tokenString); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *TokenRepository) InvalidateAll(ctx context.Context, id int64) error {
+	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
+	defer cancel()
+
+	query := `UPDATE tokens SET is_valid = FALSE WHERE id = $1`
+	if _, err := r.ExecContext(ctx, query, id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *TokenRepository) Get(ctx context.Context, tokenString string) (*entity.Token, error) {
 	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
 
@@ -41,16 +62,4 @@ func (r *TokenRepository) GetToken(ctx context.Context, tokenString string) (*en
 	}
 
 	return &token, nil
-}
-
-func (r *TokenRepository) InvalidateUserTokens(ctx context.Context, id int64) error {
-	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
-	defer cancel()
-
-	query := `UPDATE tokens SET is_valid = FALSE WHERE id = $1`
-	if _, err := r.ExecContext(ctx, query, id); err != nil {
-		return err
-	}
-
-	return nil
 }

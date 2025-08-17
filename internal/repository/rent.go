@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -46,7 +47,7 @@ func (r *RentRepository) StartRent(ctx context.Context, rent *entity.Rent) (int6
 	return id, nil
 }
 
-func (r *RentRepository) EndRent(ctx context.Context, rentID int64, lat, long float64) error {
+func (r *RentRepository) EndRent(ctx context.Context, id int64, lat, long float64) error {
 	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
 
@@ -58,14 +59,14 @@ func (r *RentRepository) EndRent(ctx context.Context, rentID int64, lat, long fl
 
 	// set timeend
 	query := `UPDATE rents SET time_end = $1 WHERE id = $2`
-	if _, err := tx.ExecContext(ctx, query, time.Now(), rentID); err != nil {
+	if _, err := tx.ExecContext(ctx, query, time.Now().UTC(), id); err != nil {
 		return err
 	}
 
 	// update transport
 	var transportID int64
 	query = `SELECT transport_id FROM rents WHERE id = $1`
-	if err := r.QueryRowContext(ctx, query, rentID).Scan(&transportID); err != nil {
+	if err := r.QueryRowContext(ctx, query, id).Scan(&transportID); err != nil {
 		return err
 	}
 
@@ -74,7 +75,23 @@ func (r *RentRepository) EndRent(ctx context.Context, rentID int64, lat, long fl
 		return err
 	}
 
-	//set final price
+	// set final price
+	rent, err := r.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	var duration int64
+	if rent.PriceType == "Minutes" {
+		duration = int64(math.Ceil(rent.TimeEnd.Sub(rent.TimeStart).Minutes()))
+	} else {
+		duration = int64(math.Ceil(rent.TimeEnd.Sub(rent.TimeStart).Hours() / 24))
+	}
+
+	query = `UPDATE rents SET final_price = $1 WHERE id = $2`
+	if _, err := tx.ExecContext(ctx, query, (rent.PriceOfUnit * duration), id); err != nil {
+		return err
+	}
 
 	if err := tx.Commit(); err != nil {
 		return err
@@ -135,6 +152,34 @@ func (r *RentRepository) GetHistoryByTransport(ctx context.Context, transportID 
 	rents := make([]entity.Rent, 0, 100)
 	query := `SELECT * FROM rents WHERE transport_id = $1`
 	rows, err := r.QueryxContext(ctx, query, transportID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var rent entity.Rent
+		if err := rows.StructScan(&rent); err != nil {
+			return nil, err
+		}
+
+		rents = append(rents, rent)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return rents, nil
+}
+
+func (r *RentRepository) ListActive(ctx context.Context) ([]entity.Rent, error) {
+	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
+	defer cancel()
+
+	rents := make([]entity.Rent, 0, 100)
+	query := `SELECT * FROM rents WHERE time_end = NULL`
+	rows, err := r.QueryxContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}

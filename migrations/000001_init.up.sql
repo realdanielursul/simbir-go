@@ -11,13 +11,13 @@ CREATE TABLE accounts (
 CREATE TABLE IF NOT EXISTS tokens (
   user_id BIGINT NOT NULL,
   token_string TEXT NOT NULL,
-  is_valid BOOLEAN NOT NULL
+  is_valid BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE transports (
     id BIGSERIAL PRIMARY KEY,
     owner_id BIGINT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-    can_be_rented BOOLEAN NOT NULL DEFAULT TRUE,
+    can_be_rented BOOLEAN NOT NULL,
     transport_type TEXT NOT NULL CHECK (transport_type IN ('Car', 'Bike', 'Scooter')),
     model TEXT NOT NULL,
     color TEXT NOT NULL,
