@@ -60,7 +60,7 @@ type TransportInput struct {
 	Model         string  `json:"model"`
 	Color         string  `json:"color"`
 	Identifier    string  `json:"identifier"`
-	Description   string  `json:"description"`
+	Description   *string `json:"description"`
 	Latitude      float64 `json:"latitude"`
 	Longitude     float64 `json:"longitude"`
 	MinutePrice   float64 `json:"minutePrice"`
@@ -75,7 +75,7 @@ type TransportOutput struct {
 	Model         string    `json:"model"`
 	Color         string    `json:"color"`
 	Identifier    string    `json:"identifier"`
-	Description   string    `json:"description"`
+	Description   *string   `json:"description,omitempty"`
 	Latitude      float64   `json:"latitude"`
 	Longitude     float64   `json:"longitude"`
 	MinutePrice   float64   `json:"minutePrice"`
@@ -89,7 +89,7 @@ type Transport interface {
 	GetTransport(ctx context.Context, id int64) (*TransportOutput, error)
 	ListTransport(ctx context.Context, transportType string, count, start int) ([]TransportOutput, error)
 	ListTransportByOwner(ctx context.Context, ownerID int64, count, start int) ([]TransportOutput, error)
-	ListTransportAvailable(ctx context.Context, lat, long, radius float64, transportType string) ([]TransportOutput, error)
+	// ListTransportAvailable(ctx context.Context, lat, long, radius float64, transportType string) ([]TransportOutput, error)
 	UpdateTransport(ctx context.Context, userID, id int64, input *TransportInput) error
 	DeleteTransport(ctx context.Context, userID, id int64) error
 }
@@ -101,7 +101,7 @@ type AdminTransportInput struct {
 	Model         string  `json:"model"`
 	Color         string  `json:"color"`
 	Identifier    string  `json:"identifier"`
-	Description   string  `json:"description"`
+	Description   *string `json:"description,omitempty"`
 	Latitude      float64 `json:"latitude"`
 	Longitude     float64 `json:"longitude"`
 	MinutePrice   float64 `json:"minutePrice"`

@@ -117,11 +117,11 @@ func (s *AdminAccountService) UpdateAccount(ctx context.Context, id int64, input
 func (s *AdminAccountService) DeleteAccount(ctx context.Context, id int64) error {
 	account, err := s.accountRepo.GetByID(ctx, id)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if account == nil {
-		return nil, ErrAccountNotFound
+		return ErrAccountNotFound
 	}
 
 	if err := s.accountRepo.Delete(ctx, id); err != nil {
