@@ -33,9 +33,13 @@ type Transport interface {
 	GetByIdentifier(ctx context.Context, identifier string) (*entity.Transport, error)
 	ListByType(ctx context.Context, transportType string, count, start int) ([]entity.Transport, error)
 	ListByOwner(ctx context.Context, ownerID int64, count, start int) ([]entity.Transport, error)
-	ListAvailable(ctx context.Context, lat, long, radius float64, transportType string) ([]entity.Transport, error)
+	ListByAvailability(ctx context.Context, lat, long, radius float64, transportType string) ([]entity.Transport, error)
 	Update(ctx context.Context, transport *entity.Transport) error
 	Delete(ctx context.Context, id int64) error
+}
+
+type Payment interface {
+	UpdateBalance(ctx context.Context, accountID, amount int64) error
 }
 
 type Rent interface {
@@ -49,16 +53,12 @@ type Rent interface {
 	Delete(ctx context.Context, id int64) error
 }
 
-type Payment interface {
-	UpdateBalance(ctx context.Context, accountID int64, amount float64) error
-}
-
 type Repositories struct {
 	Account
 	Token
 	Transport
-	Rent
 	Payment
+	Rent
 }
 
 func NewRepositories(db *sqlx.DB) *Repositories {
@@ -66,7 +66,7 @@ func NewRepositories(db *sqlx.DB) *Repositories {
 		Account:   NewAccountRepository(db),
 		Token:     NewTokenRepository(db),
 		Transport: NewTransportRepository(db),
-		Rent:      NewRentRepository(db),
 		Payment:   NewPaymentRepository(db),
+		Rent:      NewRentRepository(db),
 	}
 }

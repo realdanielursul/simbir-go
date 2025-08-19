@@ -89,7 +89,7 @@ type Transport interface {
 	GetTransport(ctx context.Context, id int64) (*TransportOutput, error)
 	ListTransport(ctx context.Context, transportType string, count, start int) ([]TransportOutput, error)
 	ListTransportByOwner(ctx context.Context, ownerID int64, count, start int) ([]TransportOutput, error)
-	// ListTransportAvailable(ctx context.Context, lat, long, radius float64, transportType string) ([]TransportOutput, error)
+	ListTransportByAvailability(ctx context.Context, lat, long, radius float64, transportType string) ([]TransportOutput, error)
 	UpdateTransport(ctx context.Context, userID, id int64, input *TransportInput) error
 	DeleteTransport(ctx context.Context, userID, id int64) error
 }
@@ -112,6 +112,32 @@ type AdminTransport interface {
 	CreateTransport(ctx context.Context, input *AdminTransportInput) (int64, error)
 	UpdateTransport(ctx context.Context, id int64, input *AdminTransportInput) error
 	DeleteTransport(ctx context.Context, id int64) error
+}
+
+type Payment interface {
+	UpdateBalance(ctx context.Context, accountID int64, amount float64) error
+	BillingWorker(ctx context.Context)
+	ProcessBilling(ctx context.Context)
+}
+
+type RentOutput struct {
+	ID           int64      `json:"id"`
+	TransportID  int64      `json:"transportId"`
+	UserID       int64      `json:"userId"`
+	TimeStart    time.Time  `json:"timeStart"`
+	TimeEnd      *time.Time `json:"timeEnd,omitempty"`
+	PriceOfUnit  int64      `json:"priceOfUnit"`
+	PriceType    string     `json:"priceType"`
+	FinalPrice   *int64     `json:"finalPrice,omitempty"`
+	LastBilledAt time.Time  `json:"lastBilledAt"`
+}
+
+type Rent interface {
+	StartRent(ctx context.Context, userID, transportID int64, rentType string) (int64, error)
+	StopRent(ctx context.Context, userID, id int64, lat, long float64) error
+	GetRent(ctx context.Context, id int64) (*RentOutput, error)
+	ListRentsByAccount(ctx context.Context, accountID int64) ([]RentOutput, error)
+	ListRentsByTransport(ctx context.Context, transportID int64) ([]RentOutput, error)
 }
 
 type ServicesDependencies struct {

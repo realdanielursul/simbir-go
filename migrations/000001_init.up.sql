@@ -40,4 +40,5 @@ CREATE TABLE rents (
     price_of_unit BIGINT NOT NULL,
     price_type TEXT NOT NULL CHECK (price_type IN ('Minutes', 'Days')),
     final_price BIGINT
+    last_billed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

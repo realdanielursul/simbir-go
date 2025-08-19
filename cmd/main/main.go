@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/realdanielursul/simbir-go/config"
@@ -36,6 +37,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("error creating postgres database: %s", err.Error())
 	}
+
+	t1 := time.Date(2025, 8, 20, 13, 13, 13, 0, time.UTC)
+	t2 := time.Date(2025, 8, 21, 14, 14, 0, 0, time.UTC)
+	fmt.Println(int64(t2.Sub(t1).Hours() / 24))
 
 	repositories := repository.NewRepositories(db)
 	ctx := context.Background()

@@ -141,7 +141,36 @@ func (s *TransportService) ListTransportByOwner(ctx context.Context, ownerID int
 	return transportsOutput, nil
 }
 
-// func (s *TransportService) ListTransportAvailable(ctx context.Context, lat, long, radius float64, transportType string) ([]TransportOutput, error)
+func (s *TransportService) ListTransportByAvailability(ctx context.Context, lat, long, radius float64, transportType string) ([]TransportOutput, error) {
+	transports, err := s.transportRepo.ListByAvailability(ctx, lat, long, radius, transportType)
+	if err != nil {
+		return nil, err
+	}
+
+	transportsOutput := make([]TransportOutput, 0, len(transports))
+	for _, transport := range transports {
+		transportOutput := TransportOutput{
+			ID:            transport.ID,
+			OwnerID:       transport.OwnerID,
+			CanBeRented:   transport.CanBeRented,
+			TransportType: transport.TransportType,
+			Model:         transport.Model,
+			Color:         transport.Color,
+			Identifier:    transport.Identifier,
+			Description:   transport.Description,
+			Latitude:      transport.Latitude,
+			Longitude:     transport.Longitude,
+			MinutePrice:   float64(transport.MinutePrice) / 100,
+			DayPrice:      float64(transport.DayPrice) / 100,
+			CreatedAt:     transport.CreatedAt,
+			UpdatedAt:     transport.UpdatedAt,
+		}
+
+		transportsOutput = append(transportsOutput, transportOutput)
+	}
+
+	return transportsOutput, nil
+}
 
 func (s *TransportService) UpdateTransport(ctx context.Context, userID, id int64, input *TransportInput) error {
 	// validate data

@@ -12,4 +12,6 @@ var (
 	ErrAccountNotFound         = errors.New("account not found")
 	ErrTransportNotFound       = errors.New("transport not found")
 	ErrAccessDenied            = errors.New("access denied")
+	ErrNotEnoughMoney          = errors.New("not enough money")
+	ErrInvalidRentType         = errors.New("invalid rent type")
 )

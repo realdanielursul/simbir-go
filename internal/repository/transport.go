@@ -131,7 +131,7 @@ func (r *TransportRepository) ListByOwner(ctx context.Context, ownerID int64, co
 	return transports, nil
 }
 
-func (r *TransportRepository) ListAvailable(ctx context.Context, lat, long, radius float64, transportType string) ([]entity.Transport, error) {
+func (r *TransportRepository) ListByAvailability(ctx context.Context, lat, long, radius float64, transportType string) ([]entity.Transport, error) {
 	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
 
