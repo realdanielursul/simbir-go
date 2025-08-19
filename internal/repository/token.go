@@ -27,6 +27,19 @@ func (r *TokenRepository) Create(ctx context.Context, token *entity.Token) error
 	return nil
 }
 
+func (r *TokenRepository) Get(ctx context.Context, tokenString string) (*entity.Token, error) {
+	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
+	defer cancel()
+
+	var token entity.Token
+	query := `SELECT * FROM tokens WHERE token_string = $1`
+	if err := r.QueryRowxContext(ctx, query, tokenString).StructScan(&token); err != nil {
+		return nil, err
+	}
+
+	return &token, nil
+}
+
 func (r *TokenRepository) Invalidate(ctx context.Context, tokenString string) error {
 	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
@@ -49,17 +62,4 @@ func (r *TokenRepository) InvalidateAll(ctx context.Context, id int64) error {
 	}
 
 	return nil
-}
-
-func (r *TokenRepository) Get(ctx context.Context, tokenString string) (*entity.Token, error) {
-	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
-	defer cancel()
-
-	var token entity.Token
-	query := `SELECT * FROM tokens WHERE token_string = $1`
-	if err := r.QueryRowxContext(ctx, query, tokenString).StructScan(&token); err != nil {
-		return nil, err
-	}
-
-	return &token, nil
 }

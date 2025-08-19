@@ -39,10 +39,6 @@ type Transport interface {
 	Delete(ctx context.Context, id int64) error
 }
 
-type Payment interface {
-	UpdateBalance(ctx context.Context, accountID, amount int64) error
-}
-
 type Rent interface {
 	StartRent(ctx context.Context, rent *entity.Rent) (int64, error)
 	EndRent(ctx context.Context, id int64, lat, long float64) error
@@ -55,12 +51,16 @@ type Rent interface {
 	Delete(ctx context.Context, id int64) error
 }
 
+type Payment interface {
+	UpdateBalance(ctx context.Context, accountID, amount int64) error
+}
+
 type Repositories struct {
 	Account
 	Token
 	Transport
-	Payment
 	Rent
+	Payment
 }
 
 func NewRepositories(db *sqlx.DB) *Repositories {
@@ -68,7 +68,7 @@ func NewRepositories(db *sqlx.DB) *Repositories {
 		Account:   NewAccountRepository(db),
 		Token:     NewTokenRepository(db),
 		Transport: NewTransportRepository(db),
-		Payment:   NewPaymentRepository(db),
 		Rent:      NewRentRepository(db),
+		Payment:   NewPaymentRepository(db),
 	}
 }

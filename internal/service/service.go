@@ -114,12 +114,6 @@ type AdminTransport interface {
 	DeleteTransport(ctx context.Context, id int64) error
 }
 
-type Payment interface {
-	UpdateBalance(ctx context.Context, accountID int64, amount float64) error
-	BillingWorker(ctx context.Context)
-	ProcessBilling(ctx context.Context)
-}
-
 type RentOutput struct {
 	ID           int64      `json:"id"`
 	TransportID  int64      `json:"transportId"`
@@ -140,6 +134,30 @@ type Rent interface {
 	ListRentsByTransport(ctx context.Context, transportID int64) ([]RentOutput, error)
 }
 
+type AdminRentInput struct {
+	TransportID int64     `json:"transportId"`
+	UserID      int64     `json:"userId"`
+	TimeStart   time.Time `json:"timeStart"`
+	PriceOfUnit float64   `json:"priceOfUnit"`
+	PriceType   string    `json:"priceType"`
+}
+
+type AdminRent interface {
+	GetRent(ctx context.Context, id int64) (*RentOutput, error)
+	ListRentsByUser(ctx context.Context, userID int64) ([]RentOutput, error)
+	ListRentsByTransport(ctx context.Context, transportID int64) ([]RentOutput, error)
+	StartRent(ctx context.Context, input *AdminRentInput) (int64, error)
+	EndRent(ctx context.Context, id int64, lat, long float64) error
+	DeleteRent(ctx context.Context, id int64) error
+	// Update? breaks logic
+}
+
+type Payment interface {
+	UpdateBalance(ctx context.Context, accountID int64, amount float64) error
+	BillingWorker(ctx context.Context)
+	ProcessBilling(ctx context.Context)
+}
+
 type ServicesDependencies struct {
 	Repos    *repository.Repositories
 	Hasher   hasher.PasswordHasher
@@ -152,8 +170,9 @@ type Services struct {
 	AdminAccount   AdminAccount
 	Transport      Transport
 	AdminTransport AdminTransport
-	Payment        Payment
 	Rent           Rent
+	AdminRent      AdminRent
+	Payment        Payment
 }
 
 func NewServices(deps ServicesDependencies) *Services {
@@ -162,7 +181,8 @@ func NewServices(deps ServicesDependencies) *Services {
 		AdminAccount:   NewAdminAccountService(deps.Repos.Account, deps.Hasher),
 		Transport:      NewTransportService(deps.Repos.Transport),
 		AdminTransport: NewAdminTransportService(deps.Repos.Transport),
-		Payment:        NewPaymentService(deps.Repos.Account, deps.Repos.Payment, deps.Repos.Transport, deps.Repos.Rent),
 		Rent:           NewRentService(deps.Repos.Account, deps.Repos.Payment, deps.Repos.Transport, deps.Repos.Rent),
+		AdminRent:      NewAdminRentService(),
+		Payment:        NewPaymentService(deps.Repos.Account, deps.Repos.Payment, deps.Repos.Transport, deps.Repos.Rent),
 	}
 }

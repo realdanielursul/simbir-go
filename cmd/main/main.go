@@ -22,6 +22,8 @@ import (
 
 // philosophy: admin methods do not require validation
 
+// sql queries to several lines
+
 func main() {
 	logger.SetLogrus()
 

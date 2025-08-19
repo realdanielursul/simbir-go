@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"math"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/realdanielursul/simbir-go/internal/entity"
@@ -22,20 +21,10 @@ func (r *RentRepository) StartRent(ctx context.Context, rent *entity.Rent) (int6
 	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
 
-	tx, err := r.BeginTxx(ctx, nil)
-	if err != nil {
-		return -1, fmt.Errorf("begin tx: %w", err)
-	}
-	defer tx.Rollback()
-
 	var id int64
 	query := `INSERT INTO rents (transport_id, user_id, time_start, time_end, price_of_unit, price_type, final_price) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
-	if err := tx.QueryRowxContext(ctx, query, rent.TransportID, rent.UserID, rent.TimeStart, rent.TimeEnd, rent.PriceOfUnit, rent.PriceType, rent.FinalPrice).Scan(&id); err != nil {
-		return -1, err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return -1, err
+	if err := r.QueryRowxContext(ctx, query, rent.TransportID, rent.UserID, rent.TimeStart, rent.TimeEnd, rent.PriceOfUnit, rent.PriceType, rent.FinalPrice).Scan(&id); err != nil {
+		return 0, err
 	}
 
 	return id, nil
@@ -51,32 +40,23 @@ func (r *RentRepository) EndRent(ctx context.Context, id int64, lat, long float6
 	}
 	defer tx.Rollback()
 
-	// set time_end
-	query := `UPDATE rents SET time_end = NOW() WHERE id = $1`
-	if _, err := tx.ExecContext(ctx, query, id); err != nil {
-		return err
-	}
-
-	// set final_price
-	rent, err := r.GetByID(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	var duration int64
-	if rent.PriceType == "Minutes" {
-		duration = int64(math.Ceil(rent.TimeEnd.Sub(rent.TimeStart).Minutes()))
-	} else {
-		duration = int64(math.Ceil(rent.TimeEnd.Sub(rent.TimeStart).Hours() / 24))
-	}
-
-	query = `UPDATE rents SET final_price = $1 WHERE id = $2`
-	if _, err := tx.ExecContext(ctx, query, (rent.PriceOfUnit * duration), id); err != nil {
-		return err
+	var rentID int64
+	query := `
+		UPDATE rents
+		SET time_end = NOW(),
+		    final_price = CASE price_type
+		        WHEN 'Minutes' THEN CEIL(EXTRACT(EPOCH FROM (NOW() - time_start)) / 60) * price_of_unit
+		        ELSE CEIL(EXTRACT(EPOCH FROM (NOW() - time_start)) / 86400) * price_of_unit
+		    END
+		WHERE id = $1
+		RETURNING id
+	`
+	if err := tx.QueryRowxContext(ctx, query, id).Scan(&rentID); err != nil {
+		return fmt.Errorf("update rent: %w", err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return err
+		return fmt.Errorf("commit rent: %w", err)
 	}
 
 	return nil
