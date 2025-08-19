@@ -14,4 +14,5 @@ var (
 	ErrAccessDenied            = errors.New("access denied")
 	ErrNotEnoughMoney          = errors.New("not enough money")
 	ErrInvalidRentType         = errors.New("invalid rent type")
+	ErrRentNotFound            = errors.New("rent not found")
 )

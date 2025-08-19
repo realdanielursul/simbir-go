@@ -134,7 +134,7 @@ type RentOutput struct {
 
 type Rent interface {
 	StartRent(ctx context.Context, userID, transportID int64, rentType string) (int64, error)
-	StopRent(ctx context.Context, userID, id int64, lat, long float64) error
+	EndRent(ctx context.Context, userID, id int64, lat, long float64) error
 	GetRent(ctx context.Context, id int64) (*RentOutput, error)
 	ListRentsByAccount(ctx context.Context, accountID int64) ([]RentOutput, error)
 	ListRentsByTransport(ctx context.Context, transportID int64) ([]RentOutput, error)

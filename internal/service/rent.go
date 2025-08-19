@@ -46,10 +46,10 @@ func (s *RentService) StartRent(ctx context.Context, userID, transportID int64, 
 
 	if rentType == "Minutes" && account.Balance < transport.MinutePrice {
 		return -1, ErrNotEnoughMoney
-	} else if rentType == "Days" && account.Balance < transport.DayPrice {
+	}
+
+	if rentType == "Days" && account.Balance < transport.DayPrice {
 		return -1, ErrNotEnoughMoney
-	} else {
-		return -1, ErrInvalidRentType
 	}
 
 	var priceOfUnit int64
@@ -69,17 +69,120 @@ func (s *RentService) StartRent(ctx context.Context, userID, transportID int64, 
 		FinalPrice:  nil,
 	})
 
-	_, err = s.rentRepo.GetByID(ctx, id)
-	if err != nil {
+	if err := s.transportRepo.ChangeAvailability(ctx, transportID, false); err != nil {
 		return -1, err
 	}
 
-	return -1, nil
+	return id, nil
 }
 
-func (s *RentService) StopRent(ctx context.Context, userID, id int64, lat, long float64) error {
-	panic("")
+func (s *RentService) EndRent(ctx context.Context, userID, id int64, lat, long float64) error {
+	rent, err := s.rentRepo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if rent == nil {
+		return ErrRentNotFound
+	}
+
+	if err := s.rentRepo.EndRent(ctx, id, lat, long); err != nil {
+		return err
+	}
+
+	if err := s.transportRepo.ChangeAvailability(ctx, rent.TransportID, true); err != nil {
+		return err
+	}
+
+	return nil
 }
-func (s *RentService) GetRent(ctx context.Context, id int64) (*RentOutput, error)
-func (s *RentService) ListRentsByAccount(ctx context.Context, accountID int64) ([]RentOutput, error)
-func (s *RentService) ListRentsByTransport(ctx context.Context, transportID int64) ([]RentOutput, error)
+
+func (s *RentService) GetRent(ctx context.Context, id int64) (*RentOutput, error) {
+	rent, err := s.rentRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if rent == nil {
+		return nil, ErrRentNotFound
+	}
+
+	return &RentOutput{
+		ID:          rent.ID,
+		TransportID: rent.TransportID,
+		UserID:      rent.UserID,
+		TimeStart:   rent.TimeStart,
+		TimeEnd:     rent.TimeEnd,
+		PriceOfUnit: rent.PriceOfUnit,
+		PriceType:   rent.PriceType,
+		FinalPrice:  rent.FinalPrice,
+	}, nil
+}
+
+func (s *RentService) ListRentsByAccount(ctx context.Context, accountID int64) ([]RentOutput, error) {
+	account, err := s.accountRepo.GetByID(ctx, accountID)
+	if err != nil {
+		return nil, err
+	}
+
+	if account == nil {
+		return nil, ErrAccountNotFound
+	}
+
+	rents, err := s.rentRepo.GetHistoryByUser(ctx, accountID)
+	if err != nil {
+		return nil, err
+	}
+
+	rentsOutput := make([]RentOutput, 0, len(rents))
+	for _, rent := range rents {
+		rentOutput := RentOutput{
+			ID:          rent.ID,
+			TransportID: rent.TransportID,
+			UserID:      rent.UserID,
+			TimeStart:   rent.TimeStart,
+			TimeEnd:     rent.TimeEnd,
+			PriceOfUnit: rent.PriceOfUnit,
+			PriceType:   rent.PriceType,
+			FinalPrice:  rent.FinalPrice,
+		}
+
+		rentsOutput = append(rentsOutput, rentOutput)
+	}
+
+	return rentsOutput, nil
+}
+
+func (s *RentService) ListRentsByTransport(ctx context.Context, transportID int64) ([]RentOutput, error) {
+	transport, err := s.transportRepo.GetByID(ctx, transportID)
+	if err != nil {
+		return nil, err
+	}
+
+	if transport == nil {
+		return nil, ErrAccountNotFound
+	}
+
+	rents, err := s.rentRepo.GetHistoryByTransport(ctx, transportID)
+	if err != nil {
+		return nil, err
+	}
+
+	rentsOutput := make([]RentOutput, 0, len(rents))
+	for _, rent := range rents {
+		rentOutput := RentOutput{
+			ID:          rent.ID,
+			TransportID: rent.TransportID,
+			UserID:      rent.UserID,
+			TimeStart:   rent.TimeStart,
+			TimeEnd:     rent.TimeEnd,
+			PriceOfUnit: rent.PriceOfUnit,
+			PriceType:   rent.PriceType,
+			FinalPrice:  rent.FinalPrice,
+		}
+
+		rentsOutput = append(rentsOutput, rentOutput)
+	}
+
+	return rentsOutput, nil
+}

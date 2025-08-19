@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/realdanielursul/simbir-go/internal/entity"
@@ -35,11 +34,6 @@ func (r *RentRepository) StartRent(ctx context.Context, rent *entity.Rent) (int6
 		return -1, err
 	}
 
-	query = `UPDATE transports SET can_be_rented = FALSE WHERE id = $1`
-	if _, err := tx.ExecContext(ctx, query, rent.TransportID); err != nil {
-		return -1, err
-	}
-
 	if err := tx.Commit(); err != nil {
 		return -1, err
 	}
@@ -57,25 +51,13 @@ func (r *RentRepository) EndRent(ctx context.Context, id int64, lat, long float6
 	}
 	defer tx.Rollback()
 
-	// set timeend
-	query := `UPDATE rents SET time_end = $1 WHERE id = $2`
-	if _, err := tx.ExecContext(ctx, query, time.Now().UTC(), id); err != nil {
+	// set time_end
+	query := `UPDATE rents SET time_end = NOW() WHERE id = $1`
+	if _, err := tx.ExecContext(ctx, query, id); err != nil {
 		return err
 	}
 
-	// update transport
-	var transportID int64
-	query = `SELECT transport_id FROM rents WHERE id = $1`
-	if err := r.QueryRowContext(ctx, query, id).Scan(&transportID); err != nil {
-		return err
-	}
-
-	query = `UPDATE transports SET can_be_rented = TRUE, latitude = $1, longitude = $2 WHERE id = $3`
-	if _, err := tx.ExecContext(ctx, query, lat, long, transportID); err != nil {
-		return err
-	}
-
-	// set final price
+	// set final_price
 	rent, err := r.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -207,6 +189,18 @@ func (r *RentRepository) Update(ctx context.Context, rent *entity.Rent) error {
 
 	query := `UPDATE rents SET transport_id = $1, user_id = $2, time_start = $3, time_end = $4, price_of_unit = $5, price_type = $6, final_price = $7 WHERE id = $8`
 	if _, err := r.ExecContext(ctx, query, rent.TransportID, rent.UserID, rent.TimeStart, rent.TimeEnd, rent.PriceOfUnit, rent.PriceType, rent.FinalPrice, rent.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *RentRepository) UpdateLastBilledTime(ctx context.Context, id int64) error {
+	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
+	defer cancel()
+
+	query := `UPDATE rents SET last_billed_at = NOW() WHERE id = $1`
+	if _, err := r.ExecContext(ctx, query, id); err != nil {
 		return err
 	}
 

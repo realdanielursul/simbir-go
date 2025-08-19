@@ -184,6 +184,18 @@ func (r *TransportRepository) Update(ctx context.Context, transport *entity.Tran
 	return nil
 }
 
+func (r *TransportRepository) ChangeAvailability(ctx context.Context, id int64, can_be_rented bool) error {
+	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
+	defer cancel()
+
+	query := `UPDATE transports SET can_be_rented = $1 WHERE id = $2`
+	if _, err := r.ExecContext(ctx, query, can_be_rented, id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *TransportRepository) Delete(ctx context.Context, id int64) error {
 	ctx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()

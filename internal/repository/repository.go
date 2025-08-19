@@ -22,9 +22,9 @@ type Account interface {
 
 type Token interface {
 	Create(ctx context.Context, token *entity.Token) error
+	Get(ctx context.Context, tokenString string) (*entity.Token, error)
 	Invalidate(ctx context.Context, tokenString string) error
 	InvalidateAll(ctx context.Context, id int64) error
-	Get(ctx context.Context, tokenString string) (*entity.Token, error)
 }
 
 type Transport interface {
@@ -35,6 +35,7 @@ type Transport interface {
 	ListByOwner(ctx context.Context, ownerID int64, count, start int) ([]entity.Transport, error)
 	ListByAvailability(ctx context.Context, lat, long, radius float64, transportType string) ([]entity.Transport, error)
 	Update(ctx context.Context, transport *entity.Transport) error
+	ChangeAvailability(ctx context.Context, id int64, can_be_rented bool) error
 	Delete(ctx context.Context, id int64) error
 }
 
@@ -50,6 +51,7 @@ type Rent interface {
 	GetHistoryByTransport(ctx context.Context, transportID int64) ([]entity.Rent, error)
 	ListActive(ctx context.Context) ([]entity.Rent, error)
 	Update(ctx context.Context, rent *entity.Rent) error
+	UpdateLastBilledTime(ctx context.Context, id int64) error
 	Delete(ctx context.Context, id int64) error
 }
 

@@ -61,20 +61,22 @@ func (s *PaymentService) ProcessBilling(ctx context.Context) {
 		logrus.Errorf("billing error: %w", err)
 	}
 
-	now := time.Now().UTC()
-
 	for _, rent := range rents {
 		account, err := s.accountRepo.GetByID(ctx, rent.UserID)
 		if err != nil {
 			logrus.Errorf("billing error: %w", err)
 		}
 
-		elapsed := now.Sub(rent.LastBilledAt)
+		elapsed := time.Now().UTC().Sub(rent.LastBilledAt)
 
 		switch rent.PriceType {
 		case "Minutes":
 			if account.Balance < rent.PriceOfUnit {
 				if err := s.rentRepo.EndRent(ctx, rent.ID, 0, 0); err != nil {
+					logrus.Errorf("billing error: %w", err)
+				}
+
+				if err := s.transportRepo.ChangeAvailability(ctx, rent.TransportID, true); err != nil {
 					logrus.Errorf("billing error: %w", err)
 				}
 			}
@@ -83,16 +85,28 @@ func (s *PaymentService) ProcessBilling(ctx context.Context) {
 				if err := s.paymentRepo.UpdateBalance(ctx, rent.UserID, rent.PriceOfUnit); err != nil {
 					logrus.Errorf("billing error: %w", err)
 				}
+
+				if err := s.rentRepo.UpdateLastBilledTime(ctx, rent.ID); err != nil {
+					logrus.Errorf("billing error: %w", err)
+				}
 			}
 		case "Days":
 			if account.Balance < rent.PriceOfUnit {
-				if err := .EndRent(ctx, rent.ID, 0, 0); err != nil {
+				if err := s.rentRepo.EndRent(ctx, rent.ID, 0, 0); err != nil {
+					logrus.Errorf("billing error: %w", err)
+				}
+
+				if err := s.transportRepo.ChangeAvailability(ctx, rent.TransportID, true); err != nil {
 					logrus.Errorf("billing error: %w", err)
 				}
 			}
 
 			if int64(elapsed.Hours()/24) == 1 {
 				if err := s.paymentRepo.UpdateBalance(ctx, rent.UserID, rent.PriceOfUnit); err != nil {
+					logrus.Errorf("billing error: %w", err)
+				}
+
+				if err := s.rentRepo.UpdateLastBilledTime(ctx, rent.ID); err != nil {
 					logrus.Errorf("billing error: %w", err)
 				}
 			}
