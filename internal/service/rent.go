@@ -166,7 +166,7 @@ func (s *RentService) ListRentsByTransport(ctx context.Context, transportID int6
 	}
 
 	if transport == nil {
-		return nil, ErrAccountNotFound
+		return nil, ErrTransportNotFound
 	}
 
 	rents, err := s.rentRepo.GetHistoryByTransport(ctx, transportID)

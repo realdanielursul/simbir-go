@@ -143,11 +143,11 @@ type AdminRentInput struct {
 }
 
 type AdminRent interface {
+	StartRent(ctx context.Context, input *AdminRentInput) (int64, error)
+	EndRent(ctx context.Context, id int64, lat, long float64) error
 	GetRent(ctx context.Context, id int64) (*RentOutput, error)
 	ListRentsByUser(ctx context.Context, userID int64) ([]RentOutput, error)
 	ListRentsByTransport(ctx context.Context, transportID int64) ([]RentOutput, error)
-	StartRent(ctx context.Context, input *AdminRentInput) (int64, error)
-	EndRent(ctx context.Context, id int64, lat, long float64) error
 	DeleteRent(ctx context.Context, id int64) error
 	// Update? breaks logic
 }
@@ -182,7 +182,7 @@ func NewServices(deps ServicesDependencies) *Services {
 		Transport:      NewTransportService(deps.Repos.Transport),
 		AdminTransport: NewAdminTransportService(deps.Repos.Transport),
 		Rent:           NewRentService(deps.Repos.Account, deps.Repos.Payment, deps.Repos.Transport, deps.Repos.Rent),
-		AdminRent:      NewAdminRentService(),
+		AdminRent:      NewAdminRentService(deps.Repos.Account, deps.Repos.Payment, deps.Repos.Transport, deps.Repos.Rent),
 		Payment:        NewPaymentService(deps.Repos.Account, deps.Repos.Payment, deps.Repos.Transport, deps.Repos.Rent),
 	}
 }
