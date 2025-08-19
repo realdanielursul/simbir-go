@@ -10,13 +10,15 @@ import (
 
 type RentService struct {
 	accountRepo   repository.Account
+	paymentRepo   repository.Payment
 	transportRepo repository.Transport
 	rentRepo      repository.Rent
 }
 
-func NewRentService(accountRepo repository.Account, transportRepo repository.Transport, rentRepo repository.Rent) *RentService {
+func NewRentService(accountRepo repository.Account, paymentRepo repository.Payment, transportRepo repository.Transport, rentRepo repository.Rent) *RentService {
 	return &RentService{
 		accountRepo:   accountRepo,
+		paymentRepo:   paymentRepo,
 		transportRepo: transportRepo,
 		rentRepo:      rentRepo,
 	}
@@ -71,6 +73,10 @@ func (s *RentService) StartRent(ctx context.Context, userID, transportID int64, 
 
 	if err := s.transportRepo.ChangeAvailability(ctx, transportID, false); err != nil {
 		return -1, err
+	}
+
+	if err := s.paymentRepo.UpdateBalance(ctx, userID, -priceOfUnit); err != nil {
+		return -1, ErrRentNotFound
 	}
 
 	return id, nil

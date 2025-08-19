@@ -160,7 +160,7 @@ func (r *RentRepository) ListActive(ctx context.Context) ([]entity.Rent, error) 
 	defer cancel()
 
 	rents := make([]entity.Rent, 0, 100)
-	query := `SELECT * FROM rents WHERE time_end = NULL`
+	query := `SELECT * FROM rents WHERE time_end IS NULL`
 	rows, err := r.QueryxContext(ctx, query)
 	if err != nil {
 		return nil, err

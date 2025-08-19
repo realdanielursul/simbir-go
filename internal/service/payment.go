@@ -56,6 +56,8 @@ func (s *PaymentService) BillingWorker(ctx context.Context) {
 }
 
 func (s *PaymentService) ProcessBilling(ctx context.Context) {
+	logrus.Info("billing worker")
+
 	rents, err := s.rentRepo.ListActive(ctx)
 	if err != nil {
 		logrus.Errorf("billing error: %w", err)
@@ -81,8 +83,8 @@ func (s *PaymentService) ProcessBilling(ctx context.Context) {
 				}
 			}
 
-			if int64(elapsed.Minutes()) == 1 {
-				if err := s.paymentRepo.UpdateBalance(ctx, rent.UserID, rent.PriceOfUnit); err != nil {
+			if int64(elapsed.Seconds()) == 59 {
+				if err := s.paymentRepo.UpdateBalance(ctx, rent.UserID, -rent.PriceOfUnit); err != nil {
 					logrus.Errorf("billing error: %w", err)
 				}
 
@@ -102,7 +104,7 @@ func (s *PaymentService) ProcessBilling(ctx context.Context) {
 			}
 
 			if int64(elapsed.Hours()/24) == 1 {
-				if err := s.paymentRepo.UpdateBalance(ctx, rent.UserID, rent.PriceOfUnit); err != nil {
+				if err := s.paymentRepo.UpdateBalance(ctx, rent.UserID, -rent.PriceOfUnit); err != nil {
 					logrus.Errorf("billing error: %w", err)
 				}
 

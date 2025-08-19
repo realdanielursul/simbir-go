@@ -147,18 +147,22 @@ type ServicesDependencies struct {
 	TokenTTL time.Duration
 }
 
-// type Services struct {
-// 	Account        Account
-// 	AdminAccount   AdminAccount
-// 	Transport      Transport
-// 	AdminTransport AdminTransport
-// }
+type Services struct {
+	Account        Account
+	AdminAccount   AdminAccount
+	Transport      Transport
+	AdminTransport AdminTransport
+	Payment        Payment
+	Rent           Rent
+}
 
-// func NewServices(deps ServicesDependencies) *Services {
-// 	return &Services{
-// 		Account:        NewAccountService(deps.Repos.Account, deps.Repos.Token, deps.Hasher, deps.SignKey, deps.TokenTTL),
-// 		AdminAccount:   NewAdminAccountService(deps.Repos.Account, deps.Repos.Token, deps.Hasher),
-// 		Transport:      NewTransportService(deps.Repos.Transport),
-// 		AdminTransport: NewAdminTransportService(deps.Repos.Transport),
-// 	}
-// }
+func NewServices(deps ServicesDependencies) *Services {
+	return &Services{
+		Account:        NewAccountService(deps.Repos.Account, deps.Repos.Token, deps.Hasher, deps.SignKey, deps.TokenTTL),
+		AdminAccount:   NewAdminAccountService(deps.Repos.Account, deps.Hasher),
+		Transport:      NewTransportService(deps.Repos.Transport),
+		AdminTransport: NewAdminTransportService(deps.Repos.Transport),
+		Payment:        NewPaymentService(deps.Repos.Account, deps.Repos.Payment, deps.Repos.Transport, deps.Repos.Rent),
+		Rent:           NewRentService(deps.Repos.Account, deps.Repos.Payment, deps.Repos.Transport, deps.Repos.Rent),
+	}
+}

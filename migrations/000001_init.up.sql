@@ -1,4 +1,4 @@
-CREATE TABLE accounts (
+CREATE TABLE IF NOT EXISTS accounts (
     id BIGSERIAL PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS tokens (
   is_valid BOOLEAN NOT NULL DEFAULT TRUE
 );
 
-CREATE TABLE transports (
+CREATE TABLE IF NOT EXISTS transports (
     id BIGSERIAL PRIMARY KEY,
     owner_id BIGINT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     can_be_rented BOOLEAN NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE transports (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE rents (
+CREATE TABLE IF NOT EXISTS rents (
     id BIGSERIAL PRIMARY KEY,
     transport_id BIGINT NOT NULL REFERENCES transports(id) ON DELETE CASCADE,
     user_id BIGINT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
@@ -39,6 +39,6 @@ CREATE TABLE rents (
     time_end TIMESTAMPTZ,
     price_of_unit BIGINT NOT NULL,
     price_type TEXT NOT NULL CHECK (price_type IN ('Minutes', 'Days')),
-    final_price BIGINT
+    final_price BIGINT,
     last_billed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
